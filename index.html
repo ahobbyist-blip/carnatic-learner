@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShrutiSmriti • Carnatic Jathiswaram Memory Trainer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for crisp icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        indigo: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                            950: '#1e1b4b'
+                        },
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            600: '#475569',
+                            800: '#1e293b',
+                            900: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .clean-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+        }
+        .swara-pad {
+            transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.1s ease, background-color 0.15s ease;
+            user-select: none;
+        }
+        .swara-pad:active {
+            transform: scale(0.95);
+        }
+        .swara-glow {
+            background-color: #4f46e5 !important;
+            color: #ffffff !important;
+            transform: scale(1.03);
+            box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
+            border-color: #4338ca !important;
+        }
+        @keyframes pulseSoft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse-soft {
+            animation: pulseSoft 2s infinite ease-in-out;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col selection:bg-indigo-500 selection:text-white">
+
+    <!-- Modern Minimalist Light Navigation Header -->
+    <header class="clean-card sticky top-0 z-50 px-4 sm:px-8 py-4 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="returnToHome()">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 transition">
+                    <i class="fa-solid fa-feather text-white text-sm"></i>
+                </div>
+                <div>
+                    <span class="font-bold text-lg tracking-tight text-slate-900 flex items-center gap-1.5">
+                        ShrutiSmriti <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">Talam Dynamic MVP</span>
+                    </span>
+                    <p class="text-xs text-slate-500">Carnatic Jathiswaram Memory Trainer</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Tanpura Drone Toggle -->
+                <button onclick="toggleTanpura()" id="tanpura-btn" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-2 border border-slate-200 transition">
+                    <i class="fa-solid fa-guitar text-indigo-600" id="tanpura-icon"></i>
+                    <span class="hidden sm:inline" id="tanpura-text">Tanpura Off</span>
+                </button>
+
+                <!-- Audio toggle -->
+                <button onclick="toggleAudioEngine()" id="audio-toggle-btn" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-2 border border-slate-200 transition">
+                    <i class="fa-solid fa-volume-high text-indigo-600" id="audio-icon"></i>
+                    <span class="hidden sm:inline" id="audio-status-text">Audio Ready</span>
+                </button>
+
+                <!-- Help Button -->
+                <button onclick="openHelpModal()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center border border-slate-200 transition" title="How to Play">
+                    <i class="fa-solid fa-question text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-8 flex flex-col justify-center items-center">
+
+        <!-- SCREEN 1: JATHISWARAM SELECTION -->
+        <div id="screen-selection" class="w-full space-y-8 animate-fade-in py-2">
+            <div class="text-center max-w-2xl mx-auto space-y-3">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold tracking-wider uppercase">
+                    <i class="fa-solid fa-music"></i> Classical Ear Training
+                </div>
+                <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 font-sans">
+                    Master Carnatic Jathiswaras
+                </h1>
+                <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                    Progressive memory training structured across precise Talam cycles (starting from half-talam to multiple full cycles).
+                </p>
+            </div>
+
+            <!-- Jathiswaram Cards Grid -->
+            <div id="jathi-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 pt-4">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+
+        <!-- SCREEN 2: GAMEPLAY ARENA -->
+        <div id="screen-game" class="w-full max-w-4xl hidden flex flex-col space-y-6">
+            
+            <!-- Top Dashboard Bar -->
+            <div class="clean-card p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <button onclick="returnToHome()" class="text-xs font-semibold text-slate-500 hover:text-indigo-600 flex items-center gap-1.5 mb-1.5 transition">
+                        <i class="fa-solid fa-arrow-left"></i> All Jathiswaras
+                    </button>
+                    <h2 id="game-title" class="text-xl sm:text-2xl font-bold text-slate-900">Kalyani Jathiswaram</h2>
+                    <p id="game-subtitle" class="text-xs text-slate-500 font-mono mt-0.5">Adi Talam (8 Beats) • Raga: Kalyani</p>
+                </div>
+
+                <!-- Stats Badges -->
+                <div class="flex items-center gap-2 sm:gap-3 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+                    <div class="px-3 py-1.5 bg-white rounded-lg text-center shadow-xs">
+                        <div class="text-[10px] text-slate-400 uppercase tracking-wider font-mono">Score</div>
+                        <div id="stat-score" class="text-sm font-bold text-indigo-600 font-mono">0</div>
+                    </div>
+                    <div class="px-3 py-1.5 bg-white rounded-lg text-center shadow-xs">
+                        <div class="text-[10px] text-slate-400 uppercase tracking-wider font-mono">Talam Stage</div>
+                        <div id="stat-level" class="text-sm font-bold text-slate-700 font-mono">0.5 / 4.0</div>
+                    </div>
+                    <div class="px-3 py-1.5 bg-white rounded-lg text-center shadow-xs">
+                        <div class="text-[10px] text-slate-400 uppercase tracking-wider font-mono">Streak</div>
+                        <div id="stat-streak" class="text-sm font-bold text-emerald-600 font-mono">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Talam Progress & Status Banner -->
+            <div class="clean-card p-4 rounded-2xl flex flex-col gap-3">
+                <div class="flex justify-between items-center text-xs font-medium">
+                    <span id="game-phase-label" class="text-indigo-600 font-mono flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span> Listening to pattern...
+                    </span>
+                    <span id="game-progress-count" class="text-slate-500 font-mono">0 notes</span>
+                </div>
+                <!-- Progress track -->
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                    <div id="game-progress-bar" class="bg-gradient-to-r from-indigo-500 to-indigo-700 h-full w-0 transition-all duration-300 rounded-full"></div>
+                </div>
+            </div>
+
+            <!-- 13 Swara Pad Board (2 variants per swara type + Higher Octave Ṡ) -->
+            <div class="clean-card p-6 sm:p-8 rounded-3xl flex flex-col items-center space-y-6 shadow-xl">
+                <div class="text-center">
+                    <h3 class="text-xs uppercase font-mono tracking-widest text-slate-400">13-Swara Pad Board (2 Variants + Higher Ṡ)</h3>
+                    <p class="text-xs text-slate-500 mt-1">Tap swaras in exact sequence after playback</p>
+                </div>
+
+                <!-- 13 Swaras Grid -->
+                <div id="swara-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4 w-full">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <!-- Action Controls Footer inside arena -->
+                <div class="flex items-center justify-center gap-3 pt-2 w-full">
+                    <button id="replay-btn" onclick="replayPattern()" disabled class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 text-xs font-semibold flex items-center gap-2 border border-slate-200 transition">
+                        <i class="fa-solid fa-rotate-right text-indigo-600"></i> Replay Pattern
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- HELP MODAL -->
+    <div id="help-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
+        <div class="clean-card max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl bg-white">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                        <i class="fa-solid fa-book-open"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">How to Play</h3>
+                </div>
+                <button onclick="closeHelpModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                <div class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 font-mono font-bold text-xs border border-indigo-100">1</div>
+                    <p><strong class="text-slate-900">Dynamic Talam Progression:</strong> Round 1 starts with half a talam (e.g. 4 aksharas for Adi). Round 2 is 1 full talam, Round 3 is 1.5 talams, and so on!</p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 font-mono font-bold text-xs border border-indigo-100">2</div>
+                    <p><strong class="text-slate-900">Listen & Repeat:</strong> The app plays the phrase with soft indigo highlights. Tap the 13 swara pads in exact sequence.</p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 font-mono font-bold text-xs border border-indigo-100">3</div>
+                    <p><strong class="text-slate-900">Automatic Level Up:</strong> Correct recalls automatically advance you to the next talam stage after a brief success prompt.</p>
+                </div>
+            </div>
+
+            <button onclick="closeHelpModal()" class="w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs transition border border-slate-200">
+                Got it, let's practice!
+            </button>
+        </div>
+    </div>
+
+    <!-- LEVEL SUCCESS / AUTO-ADVANCE BANNER MODAL -->
+    <div id="result-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="clean-card max-w-sm w-full rounded-3xl p-6 sm:p-8 text-center space-y-6 shadow-2xl bg-white animate-fade-in">
+            <div id="result-icon-wrap" class="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto text-emerald-600 text-2xl shadow-md shadow-emerald-500/5">
+                <i class="fa-solid fa-award" id="result-icon"></i>
+            </div>
+            
+            <div class="space-y-1.5">
+                <h3 id="result-title" class="text-xl font-bold text-slate-900">Correct! Talam Stage Completed</h3>
+                <p id="result-desc" class="text-xs text-slate-500">Starting next stage in 2 seconds...</p>
+            </div>
+
+            <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 grid grid-cols-2 gap-3 text-left">
+                <div>
+                    <div class="text-[10px] text-slate-400 uppercase font-mono">Score Earned</div>
+                    <div id="modal-score-val" class="text-base font-bold text-indigo-600 font-mono">150</div>
+                </div>
+                <div>
+                    <div class="text-[10px] text-slate-400 uppercase font-mono">Current Streak</div>
+                    <div id="modal-streak-val" class="text-base font-bold text-emerald-600 font-mono">3</div>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button onclick="returnToHome()" class="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition border border-slate-200">
+                    Menu
+                </button>
+                <button id="modal-next-btn" onclick="proceedToNextLevelNow()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:brightness-105 text-white text-xs font-bold transition shadow-md shadow-indigo-500/25">
+                    Next Stage <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let audioCtx = null;
+        let isAudioInitialized = false;
+        let tanpuraOsc1 = null;
+        let tanpuraOsc2 = null;
+        let tanpuraGain = null;
+        let isTanpuraActive = false;
+        let autoAdvanceTimer = null;
+
+        function toggleAudioEngine() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            isAudioInitialized = true;
+            document.getElementById('audio-status-text').innerText = 'Audio Active';
+            document.getElementById('audio-icon').className = 'fa-solid fa-volume-high text-emerald-600';
+        }
+
+        function toggleTanpura() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            isAudioInitialized = true;
+
+            isTanpuraActive = !isTanpuraActive;
+            const btn = document.getElementById('tanpura-btn');
+            const icon = document.getElementById('tanpura-icon');
+            const txt = document.getElementById('tanpura-text');
+
+            if (isTanpuraActive) {
+                btn.className = 'px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold flex items-center gap-2 border border-indigo-200 transition';
+                icon.className = 'fa-solid fa-guitar text-indigo-600 animate-pulse';
+                txt.innerText = 'Tanpura On';
+                startTanpuraDrone();
+            } else {
+                btn.className = 'px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-2 border border-slate-200 transition';
+                icon.className = 'fa-solid fa-guitar text-indigo-600';
+                txt.innerText = 'Tanpura Off';
+                stopTanpuraDrone();
+            }
+        }
+
+        function startTanpuraDrone() {
+            try {
+                if (tanpuraGain) {
+                    stopTanpuraDrone();
+                }
+                tanpuraGain = audioCtx.createGain();
+                tanpuraGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+
+                tanpuraOsc1 = audioCtx.createOscillator();
+                tanpuraOsc1.type = 'sawtooth';
+                tanpuraOsc1.frequency.setValueAtTime(261.63, audioCtx.currentTime);
+
+                tanpuraOsc2 = audioCtx.createOscillator();
+                tanpuraOsc2.type = 'sine';
+                tanpuraOsc2.frequency.setValueAtTime(392.00, audioCtx.currentTime);
+
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(800, audioCtx.currentTime);
+
+                tanpuraOsc1.connect(filter);
+                tanpuraOsc2.connect(filter);
+                filter.connect(tanpuraGain);
+                tanpuraGain.connect(audioCtx.destination);
+
+                tanpuraOsc1.start();
+                tanpuraOsc2.start();
+            } catch (e) {
+                console.error("Tanpura error", e);
+            }
+        }
+
+        function stopTanpuraDrone() {
+            if (tanpuraOsc1) {
+                try { tanpuraOsc1.stop(); tanpuraOsc2.stop(); } catch(e) {}
+                tanpuraOsc1 = null;
+                tanpuraOsc2 = null;
+                tanpuraGain = null;
+            }
+        }
+
+        // 13 Swara Pad Board Map (2 variants per note type + Higher Ṡ)
+        const swaraMap = {
+            'S':  { name: 'Sa', subtitle: 'Tonic', freq: 261.63, bg: 'bg-white border-slate-200 text-slate-800 hover:border-indigo-300' },
+            'R1': { name: 'Ri1', subtitle: 'Suddha Ri', freq: 277.18, bg: 'bg-white border-slate-200 text-slate-800 hover:border-indigo-300' },
+            'R2': { name: 'Ri2', subtitle: 'Chatusr. Ri', freq: 293.66, bg: 'bg-white border-slate-200 text-slate-800 hover:border-indigo-300' },
+            'G1': { name: 'Ga1', subtitle: 'Suddha Ga', freq: 311.13, bg: 'bg-white border-slate-200 text-slate-800 hover:border-indigo-300' },
+            'G2': { name: 'Ga2', subtitle: 'Sadharana Ga', freq: 329.63, bg: 'bg-white border-slate-200 text-slate-800 hover:border-indigo-300' },
+            'M1': { name: 'Ma1', subtitle: 'Suddha Ma', freq: 349.23, bg: 'bg-white border-slate-200 text-slate-800 hover:border-indigo-300' },
+            'M2': { name: 'Ma2', subtitle: 'Prati Ma', freq: 369.99, bg: 'bg-white border-slate-200 text-slate-800 hover:border-indigo-300' },
+            'P':  { name: 'Pa', subtitle: 'Quint', freq: 392.00, bg: 'bg-white border-slate-200 text-slate-800 hover:border-indigo-300' },
+            'D1': { name: 'Dha1', subtitle: 'Suddha Dha', freq: 415.30, bg: 'bg-white border-slate-200 text-slate-800 hover:border-indigo-300' },
+            'D2': { name: 'Dha2', subtitle: 'Chatusr. Dha', freq: 440.00, bg: 'bg-white border-slate-200 text-slate-800 hover:border-indigo-300' },
+            'N1': { name: 'Ni1', subtitle: 'Suddha Ni', freq: 466.16, bg: 'bg-white border-slate-200 text-slate-800 hover:border-indigo-300' },
+            'N2': { name: 'Ni2', subtitle: 'Kaisika Ni', freq: 493.88, bg: 'bg-white border-slate-200 text-slate-800 hover:border-indigo-300' },
+            'Ṡ':  { name: 'Sa²', subtitle: 'Upper Sa', freq: 523.25, bg: 'bg-indigo-50 border-indigo-200 text-indigo-900 font-bold hover:border-indigo-400' }
+        };
+
+        // Carnatic Jathiswaram Database with Talam Aksharas (beats per cycle)
+        const jathiswarams = [
+            {
+                id: 'nattai',
+                title: 'Nattai Jathiswaram',
+                raga: 'Nattai',
+                talamName: 'Adi Talam',
+                aksharasPerTalam: 8,
+                description: 'Vibrant and majestic jathiswaram in traditional Nattai raga with Adi Talam (8 aksharas per cycle).',
+                notes: [
+                    'S', 'G2', 'M1', 'P', 'N2', 'Ṡ', 'N2', 'P', 'M1', 'G2', 'S', 'R2', 'G2', 'M1', 'P', 'N2',
+                    'Ṡ', 'N2', 'P', 'M1', 'G2', 'R2', 'S', 'N2', 'P', 'N2', 'Ṡ', 'N2', 'P', 'M1', 'G2', 'S',
+                    'M1', 'P', 'N2', 'Ṡ', 'P', 'M1', 'G2', 'R2', 'S', 'R2', 'G2', 'M1', 'P', 'N2', 'Ṡ', 'P',
+                    'Ṡ', 'N2', 'P', 'M1', 'G2', 'R2', 'S', 'N2', 'P', 'M1', 'G2', 'R2', 'S', 'N2', 'P', 'Ṡ'
+                ]
+            },
+            {
+                id: 'mohanam',
+                title: 'Mohanam Jathiswaram',
+                raga: 'Mohanam',
+                talamName: 'Adi Talam',
+                aksharasPerTalam: 8,
+                description: 'Melodious pentatonic jathiswaram in Adi Talam (8 aksharas per cycle).',
+                notes: [
+                    'S', 'R2', 'G2', 'P', 'D2', 'Ṡ', 'D2', 'P', 'G2', 'R2', 'S', 'R2', 'G2', 'P', 'D2', 'Ṡ',
+                    'P', 'D2', 'Ṡ', 'P', 'G2', 'P', 'R2', 'G2', 'S', 'R2', 'G2', 'P', 'D2', 'P', 'G2', 'R2',
+                    'G2', 'P', 'D2', 'Ṡ', 'D2', 'P', 'G2', 'R2', 'S', 'R2', 'G2', 'P', 'D2', 'Ṡ', 'D2', 'P',
+                    'Ṡ', 'D2', 'P', 'G2', 'R2', 'S', 'R2', 'G2', 'P', 'D2', 'P', 'G2', 'R2', 'S', 'R2', 'S'
+                ]
+            },
+            {
+                id: 'kalyani',
+                title: 'Vanajakshi - Kalyani',
+                raga: 'Kalyani',
+                talamName: 'Adi Talam',
+                aksharasPerTalam: 8,
+                description: 'Masterpiece by Ramnad Srinivasa Iyengar in Adi Talam (8 aksharas per cycle).',
+                notes: [
+                    'S', 'G2', 'M2', 'P', 'D2', 'N2', 'Ṡ', 'N2', 'D2', 'P', 'M2', 'G2', 'S', 'R2', 'G2', 'M2',
+                    'P', 'M2', 'G2', 'S', 'N2', 'S', 'R2', 'G2', 'M2', 'P', 'D2', 'N2', 'Ṡ', 'N2', 'D2', 'P',
+                    'M2', 'G2', 'R2', 'S', 'R2', 'G2', 'M2', 'P', 'D2', 'N2', 'P', 'D2', 'M2', 'P', 'G2', 'M2',
+                    'S', 'R2', 'G2', 'M2', 'P', 'D2', 'N2', 'Ṡ', 'P', 'M2', 'G2', 'R2', 'S', 'N2', 'D2', 'P'
+                ]
+            },
+            {
+                id: 'saveri',
+                title: 'Saveri Jathiswaram',
+                raga: 'Saveri',
+                talamName: 'Misra Chapu Talam',
+                aksharasPerTalam: 7,
+                description: 'Exquisite composition set in Misra Chapu Talam (7 aksharas per cycle).',
+                notes: [
+                    'S', 'R1', 'M1', 'P', 'D1', 'P', 'M1', 'R1', 'S', 'G2', 'M1', 'P', 'D1', 'Ṡ', 'N2', 'D1',
+                    'P', 'M1', 'G2', 'R1', 'S', 'R1', 'M1', 'P', 'D1', 'P', 'M1', 'G2', 'R1', 'S', 'N2', 'S',
+                    'M1', 'P', 'D1', 'Ṡ', 'N2', 'D1', 'P', 'M1', 'G2', 'R1', 'S', 'R1', 'M1', 'P', 'D1', 'Ṡ',
+                    'Ṡ', 'N2', 'D1', 'P', 'M1', 'G2', 'R1', 'S', 'R1', 'M1', 'P', 'D1', 'M1', 'P', 'D1', 'Ṡ'
+                ]
+            }
+        ];
+
+        let currentGame = null;
+        let currentStageIndex = 0; // 0 = 0.5 talam, 1 = 1.0 talam, 2 = 1.5 talams, 3 = 2.0 talams, etc.
+        let score = 0;
+        let streak = 0;
+        let targetNotes = [];
+        let userNotes = [];
+        let isPlayingPattern = false;
+
+        // Initialize Selection Cards
+        function renderSelectionGrid() {
+            const grid = document.getElementById('jathi-grid');
+            grid.innerHTML = '';
+
+            jathiswarams.forEach(j => {
+                grid.innerHTML += `
+                    <div onclick="selectJathiswaram('${j.id}')" class="clean-card p-6 rounded-3xl cursor-pointer hover:border-indigo-400 hover:shadow-lg transition-all duration-300 group flex flex-col justify-between">
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 text-xs font-mono font-medium">${j.raga}</span>
+                                <div class="w-8 h-8 rounded-full bg-slate-100 group-hover:bg-indigo-600 group-hover:text-white text-slate-500 flex items-center justify-center transition-all">
+                                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition">${j.title}</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed">${j.description}</p>
+                        </div>
+                        <div class="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-mono">
+                            <span><i class="fa-solid fa-clock mr-1.5 text-indigo-600"></i>${j.talamName} (${j.aksharasPerTalam} beats/cycle)</span>
+                            <span class="text-indigo-600 font-bold group-hover:underline">Start Practice →</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Render 13 Swara Pad Board
+        function renderSwaraGrid() {
+            const grid = document.getElementById('swara-grid');
+            grid.innerHTML = '';
+
+            Object.keys(swaraMap).forEach(key => {
+                const s = swaraMap[key];
+                grid.innerHTML += `
+                    <button id="swara-pad-${CSS.escape(key)}" onclick="handleUserSwara('${key}')" class="swara-pad ${s.bg} border-2 rounded-2xl h-16 sm:h-20 flex flex-col items-center justify-center p-1.5 shadow-xs cursor-pointer">
+                        <span class="text-lg sm:text-xl font-bold font-mono tracking-tight text-slate-800">${key}</span>
+                        <span class="text-[9px] sm:text-[11px] text-slate-400 font-medium mt-0.5">${s.name}</span>
+                    </button>
+                `;
+            });
+        }
+
+        // Play Carnatic Oscillator Pitch with Octave support
+        function playSwaraAudio(noteKey, duration = 350) {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            let swara = swaraMap[noteKey] || swaraMap['S'];
+            let freq = swara.freq;
+            if (noteKey === 'Ṡ') freq = 523.25;
+
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.3, audioCtx.currentTime + 0.04);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (duration / 1000));
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + (duration / 1000));
+            } catch (e) {
+                console.error("Audio error", e);
+            }
+        }
+
+        function selectJathiswaram(id) {
+            currentGame = jathiswarams.find(j => j.id === id);
+            currentStageIndex = 0; // Starts at 0.5 talam
+            score = 0;
+            streak = 0;
+
+            document.getElementById('screen-selection').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+
+            document.getElementById('game-title').innerText = currentGame.title;
+            document.getElementById('game-subtitle').innerText = `${currentGame.talamName} • Raga: ${currentGame.raga}`;
+
+            renderSwaraGrid();
+            startLevel();
+        }
+
+        function returnToHome() {
+            if (autoAdvanceTimer) clearTimeout(autoAdvanceTimer);
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-selection').classList.remove('hidden');
+            document.getElementById('result-modal').classList.add('hidden');
+            currentGame = null;
+        }
+
+        // Calculate stage multiplier: 0.5, 1.0, 1.5, 2.0, etc.
+        function getStageMultiplier() {
+            return (currentStageIndex + 1) * 0.5;
+        }
+
+        function getMaxStages() {
+            // Maximum full talams available in the piece
+            return Math.floor((currentGame.notes.length / currentGame.aksharasPerTalam) * 2);
+        }
+
+        function startLevel() {
+            if (autoAdvanceTimer) clearTimeout(autoAdvanceTimer);
+            userNotes = [];
+
+            let multiplier = getStageMultiplier();
+            let noteCount = Math.round(currentGame.aksharasPerTalam * multiplier);
+            if (noteCount > currentGame.notes.length) {
+                noteCount = currentGame.notes.length;
+            }
+            targetNotes = currentGame.notes.slice(0, noteCount);
+
+            updateDashboardStats();
+
+            let maxStages = getMaxStages();
+            document.getElementById('game-phase-label').innerHTML = `<span class="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span> Listening (${multiplier} Talam Cycle)`;
+            document.getElementById('game-progress-count').innerText = `Notes in round: ${targetNotes.length}`;
+            document.getElementById('game-progress-bar').style.width = `${((currentStageIndex + 1) / maxStages) * 100}%`;
+
+            setGridInteractive(false);
+            document.getElementById('replay-btn').disabled = true;
+
+            setTimeout(playPatternSequence, 800);
+        }
+
+        async function playPatternSequence() {
+            isPlayingPattern = true;
+            for (let i = 0; i < targetNotes.length; i++) {
+                let note = targetNotes[i];
+                highlightPad(note, 380);
+                playSwaraAudio(note, 400);
+                await sleep(500);
+            }
+            isPlayingPattern = false;
+
+            document.getElementById('game-phase-label').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Your Turn! Repeat the sequence`;
+            setGridInteractive(true);
+            document.getElementById('replay-btn').disabled = false;
+        }
+
+        function highlightPad(noteKey, duration = 300) {
+            let el = document.getElementById(`swara-pad-${CSS.escape(noteKey)}`);
+            if (el) {
+                el.classList.add('swara-glow');
+                setTimeout(() => {
+                    el.classList.remove('swara-glow');
+                }, duration);
+            }
+        }
+
+        function setGridInteractive(active) {
+            Object.keys(swaraMap).forEach(key => {
+                let el = document.getElementById(`swara-pad-${CSS.escape(key)}`);
+                if (el) {
+                    if (active) {
+                        el.classList.remove('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        el.classList.add('opacity-60');
+                    }
+                }
+            });
+        }
+
+        function handleUserSwara(key) {
+            if (isPlayingPattern) return;
+
+            playSwaraAudio(key, 250);
+            highlightPad(key, 200);
+
+            userNotes.push(key);
+            document.getElementById('game-progress-count').innerText = `Recalled: ${userNotes.length} / ${targetNotes.length}`;
+
+            let currentIndex = userNotes.length - 1;
+            let expected = targetNotes[currentIndex];
+
+            if (key !== expected) {
+                streak = 0;
+                updateDashboardStats();
+                showResultModal(false);
+                return;
+            }
+
+            if (userNotes.length === targetNotes.length) {
+                setGridInteractive(false);
+                document.getElementById('game-phase-label').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-600"></span> Sequence Matched!`;
+                score += Math.round(getStageMultiplier() * 100);
+                streak += 1;
+                updateDashboardStats();
+                showResultModal(true);
+            }
+        }
+
+        function replayPattern() {
+            if (isPlayingPattern) return;
+            userNotes = [];
+            document.getElementById('game-progress-count').innerText = `Recalled: 0 / ${targetNotes.length}`;
+            playPatternSequence();
+        }
+
+        function showResultModal(success) {
+            const modal = document.getElementById('result-modal');
+            const iconWrap = document.getElementById('result-icon-wrap');
+            const icon = document.getElementById('result-icon');
+            const title = document.getElementById('result-title');
+            const desc = document.getElementById('result-desc');
+            const nextBtn = document.getElementById('modal-next-btn');
+
+            document.getElementById('modal-score-val').innerText = score;
+            document.getElementById('modal-streak-val').innerText = streak;
+
+            if (success) {
+                iconWrap.className = 'w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto text-emerald-600 text-2xl shadow-md shadow-emerald-500/5';
+                icon.className = 'fa-solid fa-award';
+                title.innerText = `Correct! ${getStageMultiplier()} Talam Stage Completed`;
+                
+                let maxStages = getMaxStages();
+                if (currentStageIndex >= maxStages - 1 || targetNotes.length >= currentGame.notes.length) {
+                    desc.innerText = 'Amazing! You have fully mastered this Jathiswaram composition.';
+                    nextBtn.innerHTML = 'Back to Home <i class="fa-solid fa-house ml-1"></i>';
+                    nextBtn.onclick = returnToHome;
+                } else {
+                    desc.innerText = 'Ready for the next level.';
+                    nextBtn.innerHTML = 'Next Level <i class="fa-solid fa-arrow-right ml-1"></i>';
+                    nextBtn.onclick = proceedToNextLevelNow;
+                }
+            } else {
+                iconWrap.className = 'w-16 h-16 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center mx-auto text-rose-600 text-2xl shadow-md shadow-rose-500/5';
+                icon.className = 'fa-solid fa-triangle-exclamation';
+                title.innerText = 'Memory Slip!';
+                desc.innerText = 'The sequence differed from the composition phrase. Listen closely and try again!';
+                nextBtn.innerHTML = 'Try Again <i class="fa-solid fa-rotate-right ml-1"></i>';
+                nextBtn.onclick = () => {
+                    modal.classList.add('hidden');
+                    startLevel();
+                };
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function proceedToNextLevelNow() {
+            if (autoAdvanceTimer) clearTimeout(autoAdvanceTimer);
+            document.getElementById('result-modal').classList.add('hidden');
+            currentStageIndex++;
+            let maxStages = getMaxStages();
+            if (currentStageIndex >= maxStages || targetNotes.length >= currentGame.notes.length) {
+                returnToHome();
+            } else {
+                startLevel();
+            }
+        }
+
+        function updateDashboardStats() {
+            document.getElementById('stat-score').innerText = score;
+            let maxStages = currentGame ? getMaxStages() : 4;
+            document.getElementById('stat-level').innerText = `${getStageMultiplier()} / ${(maxStages * 0.5)}`;
+            document.getElementById('stat-streak').innerText = streak;
+        }
+
+        function openHelpModal() {
+            document.getElementById('help-modal').classList.remove('hidden');
+        }
+
+        function closeHelpModal() {
+            document.getElementById('help-modal').classList.add('hidden');
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        window.onload = function() {
+            renderSelectionGrid();
+        };
+    </script>
+</body>
+</html>
